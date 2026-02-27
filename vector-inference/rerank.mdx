@@ -1,0 +1,53 @@
+---
+title: "Working with Reranker"
+mode: wide
+icon: arrow-up-arrow-down
+---
+
+## What is a Reranker / CrossEncoder?
+
+A `Reranker` model provides a powerful semantic boost to the search quality of any keyword or vector search system without requiring overhauls or intensive replacing.
+
+## Using Rerankers with Trieve Vector Inference
+
+<Steps>
+<Step title="Update embedding_models.yaml">
+To use a reranker model with Trieve Vector Inference, you will need to update your embedding_models.yaml file
+
+```yaml embedding_models.yaml
+...
+models:
+  ...
+  my-reranker-model:
+    replicas: 1
+    revision: main
+    modelName: BAAI/bge-reranker-large
+...
+```
+</Step>
+
+<Step title="Upgrade your TVI cluster">
+Update TVI to include your models
+
+```bash
+helm upgrade -i vector-inference \
+  oci://709825985650.dkr.ecr.us-east-1.amazonaws.com/trieve/trieve-embeddings \
+    -f embedding_models.yaml
+```
+</Step>
+
+<Step title="Get embeddings endpoint">
+```sh
+kubectl get ing
+```
+
+```
+NAME                                              CLASS   HOSTS   ADDRESS                                                                 PORTS   AGE
+vector-inference-embedding-bge-reranker-ingress   alb     *       k8s-default-vectorin-b09efe8cf6-890425945.us-west-1.elb.amazonaws.com   80      77m
+```
+
+The output looks like this
+
+
+</Step>
+</Steps>

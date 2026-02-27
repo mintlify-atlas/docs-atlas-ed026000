@@ -1,0 +1,84 @@
+---
+title: 'Uploading Chunks to Trieve'
+description: 'Learn how to upload your chunks to Trieve'
+icon: 'upload'
+---
+## Overview
+
+We provide an easy interface for users to upload their chunks individually so that users should have control over how they chunk their data
+
+## Uploading Individual Chunks to Trieve
+
+The main route that we expose to handle this functionality is our [create chunk route](/api-reference/chunk/create-or-upsert-chunk-or-chunks).
+
+### Important Parameters
+
+- **`chunk_html`**: This is the content that will be embedded and made searchable. You can pass HTML here, and our service will automatically clean it for the embeddings.
+- **`group_ids` and `group_tracking_ids`**: These fields let you specify a group to associate the chunks with, useful for linking multiple chunks from one document.
+- **`link`, `location`, `tag_set`, `num_value`, and `time_stamp`**: These fields are indexed to enable fast filtering of chunks based on these attributes.
+- **`metadata`**: This field allows you to include any arbitrary metadata in the form of a JSON object with the chunk. 
+<Note>
+For the best filtering performance, we recommend using the `link`, `location`, `tag_set`, `num_value` and `time_stamp` rather than the metadata field as there are dedicated indexes for these. The metadata has an index built on it, but it is only optimized for match queries
+</Note>
+- **`tracking_id`**: This field allows you to assign an arbitrary ID to the chunk, aiding in coordination with your database system. You can search for chunks using this ID.
+- **`weight`**: This field allows you to assign a weight to the chunks, which can influence the chunk's ranking within search results. This is similar to merchandising features on other platforms.
+- **`semantic_boost` and `fulltext_boost`**: These fields allow you to boost the relevance of the chunk in the search results, by aligning the chunk closer to a specified phrase. This is useful for ensuring that for longer chunks, you can manually specify the most important part of the chunk, and improve relevance for the query patterns of your users.
+
+### Formatting chunk_html
+
+Creating a good `chunk_html` is crucial for the quality of your search results. Here are some tips to help you create a good `chunk_html`:
+
+- **Include all relevant information**: Make sure to include all the information that you want to be searchable in the `chunk_html`.
+- **Use newlines**: Put semantically distinct information on separate lines to help the model understand the structure of the text and search quality for each field better
+- **Label each field**: If you have multiple fields in your `chunk_html`, label each field with a header to help the model better embed the text and improve search quality.
+
+Example of a good `chunk_html`:
+```json
+    Price: $50\n
+    Brand: AmazonBasics\n
+    Product Name: AmazonBasics Gaming Office Chair, Racing Design, PU leather, White + Philips Hue Play White double pack Bundle\n
+    Description: High-back gaming chair provides ultimate comfort and control, whether at work or play; black with red accents;Made of premium PU leather upholstery on top, PVC material along the sides and bottom, and a nylon base to provide sporty racer look;Custom fit with height-adjustable armrest and tilt control for easily reclining; headset pillow and lumbar cushion offer added support;Compact and versatile, perfect TV backlight;\n
+    Color: White / Black\n
+    Product Type: CHAIR\n
+    Style: Office Chair + Hue Play\n
+    Furniture;chair;desk accessories;desk chair;game chair;gaming;gaming chair;gaming office chair;home furniture;office and computer chair;office chair;chair;chairs ergonomic;computer chair;desk chair; ergonomic office chair;essential gaming chair;gaming chair office;gaming desk;modern desk chair;office chair;
+    Country: GB\n
+    Marketplace: Amazon\n
+    Domain: amazon.co.uk
+```
+
+### Example Create Chunk Request
+<Note>
+Whenever you make a request to the Trieve API, you need to include the `TR-Dataset` header with your dataset ID and the `Authorization` header with your API key.
+</Note>
+<Tip>
+For more performant uploads, we recommend you batch your chunk uploads. You can upload multiple chunks in a single request by passing an array of chunks in the body of the request up to 120 at a time.
+</Tip>
+
+```json
+POST /api/chunk
+Headers:
+{
+    "TR-Dataset": "<Your Dataset ID>",
+    "Authorization": "<Your API Key>"
+}
+Body:
+{
+    "chunk_html": "EcoFusion Technologies provides innovative, eco-friendly technology solutions. We specialize in renewable ...",
+    "link": "https://example.com",
+    "tracking_id": "134",
+    "image_urls": ["https://example.com"],
+    "tag_set": ["324", "product", "sale"],
+    "metadata": {
+      "phone_number": "000-000-0000",
+      "price_range": "$21-$25",
+      "reviews_count": "15",
+      "address": {
+        "city": "Austin",
+        "country": "United States",
+        "state": "Texas",
+        "zip_code": "78781"
+      }
+    }
+}
+```

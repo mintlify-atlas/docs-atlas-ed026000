@@ -1,0 +1,63 @@
+---
+title: "Working with SPLADE v2"
+icon: magnifying-glass 
+description: Learn how to use SPLADE with TVI.
+mode: wide
+---
+
+## What is splade?
+
+SPLADE is similar to other inverted index approaches like BM25. SPLADE includes neural term expansion, meaning that it is able to match on synonyms much better than traditional BM25.
+
+## Using Splade with Trieve Vector Inference
+
+<Steps>
+<Step title="Update embedding_models.yaml">
+To use SPLADE with Trieve Vector Inference, you will need to adapt both the `doc` and `query` models
+
+The SPLADE `document` model is the model you use to encode files, where the `query` model is the one to encode the query that you will be searching with
+
+```yaml embedding_models.yaml
+models:
+  # ...
+  spladeDoc:
+    replicas: 1
+    modelName: naver/efficient-splade-VI-BT-large-doc
+    isSplade: true
+  spladeQuery:
+    replicas: 1
+    modelName: naver/efficient-splade-VI-BT-large-query
+    isSplade: true
+  # ...
+```
+</Step>
+
+<Step title="Upgrade your TVI cluster">
+Update TVI to include your models
+
+```bash
+helm upgrade -i vector-inference \
+    oci://registry-1.docker.io/trieve/embeddings-helm \
+    -f embedding_models.yaml
+```
+</Step>
+
+<Step title="Get embeddings endpoint">
+```sh
+kubectl get ing
+```
+</Step>
+
+<Step title="Make call to generate sparse vector">
+    ```sh
+    ENDPOINT="k8s-default-vectorin...elb.amazonaws.com"
+
+    curl -X POST \
+         -H "Content-Type: application/json"\
+         -d '{"inputs": "test input"}' \
+         --url http://$ENDPOINT/embed_sparse
+    ```
+
+  For more information checkout the [API reference](/vector-inference/embed_sparse) for sparse vectors.
+</Step>
+</Steps>
