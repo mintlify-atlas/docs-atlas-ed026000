@@ -284,6 +284,12 @@
             ]
           },
           {
+            "group": "Shopify",
+            "pages": [
+              "api-reference/shopify/post-apishopifyplan_change"
+            ]
+          },
+          {
             "group": "Public",
             "pages": [
               "api-reference/public/get-apipublic_page",
